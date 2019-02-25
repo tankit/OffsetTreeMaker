@@ -366,7 +366,7 @@ void OffsetTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   for (i_pf = pfCandidates->begin(); i_pf != endpf; ++i_pf) {
 
     int etaIndex = getEtaIndex( i_pf->eta() );
-    Flavor flavor = getFlavor( i_pf->pdgId() );
+    Flavor flavor = getFlavor( fabs(i_pf->pdgId()) );
 
     if (etaIndex == -1 || flavor == X) continue;
 /*
