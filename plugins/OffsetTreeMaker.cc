@@ -128,7 +128,7 @@ class OffsetTreeMaker : public edm::EDAnalyzer {
     edm::EDGetTokenT< vector<PileupSummaryInfo> > muTag_;
     edm::EDGetTokenT< vector<pat::PackedCandidate> > pfTag_;
     edm::EDGetTokenT< vector<pat::PackedGenParticle> > genTag_;
-    edm::EDGetTokenT< vector<reco::GenParticle>> genparticlesTag_;
+    //edm::EDGetTokenT< vector<reco::GenParticle> > genparticlesTag_;
     edm::EDGetTokenT<double> rhoTag_;
     edm::EDGetTokenT<double> rhoC0Tag_;
     edm::EDGetTokenT<double> rhoCCTag_;
@@ -147,7 +147,7 @@ OffsetTreeMaker::OffsetTreeMaker(const edm::ParameterSet& iConfig)
   muTag_ = consumes< vector<PileupSummaryInfo> >( iConfig.getParameter<edm::InputTag>("muTag") );
   pfTag_ = consumes< vector<pat::PackedCandidate> >( iConfig.getParameter<edm::InputTag>("pfTag") );
   genTag_ = consumes< vector<pat::PackedGenParticle> >( iConfig.getParameter<edm::InputTag>("genTag") );
-  genparticlesTag_ = consumes< vector<reco::GenParticle> >( iConfig.getParameter<edm::InputTag>("GenParticles") ),
+  //genparticlesTag_ = consumes< vector<reco::GenParticle> >( iConfig.getParameter<edm::InputTag>("GenParticles") );
   rhoTag_ = consumes<double>( iConfig.getParameter<edm::InputTag>("rhoTag") );
   rhoC0Tag_ = consumes<double>( iConfig.getParameter<edm::InputTag>("rhoC0Tag") );
   rhoCCTag_ = consumes<double>( iConfig.getParameter<edm::InputTag>("rhoCCTag") );
@@ -213,10 +213,10 @@ void  OffsetTreeMaker::beginJob() {
   if (isMC_) {
     tree->Branch("et_gme_gen",   et_gme_gen, "et_gme_gen[18][11]/F");
     tree->Branch("ch_et_gme_gen",   ch_et_gme_gen, "ch_et_gme_gen[18][11]/b");
+    tree->Branch("et_twopi_gen", et_twopi_gen, "et_twopi_gen[18][11]/F");
     tree->Branch("et_gen",     et_gen,     "et_gen[nEta]/F");
     tree->Branch("etMED_gen",  etMED_gen,  "etMED_gen[nEta]/F");
     tree->Branch("etMEAN_gen", etMEAN_gen, "etMEAN_gen[nEta]/F");
-    tree->Branch("et_twopi_gen", et_twopi_gen, "et_twopi_gen[18][11]/F");
     tree->Branch("particle_type", "std::vector<int>",   &particle_type);
     tree->Branch("particle_pt",   "std::vector<float>", &particle_pt);
     tree->Branch("particle_eta",  "std::vector<float>", &particle_eta);
@@ -327,13 +327,13 @@ void OffsetTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     vector<pat::PackedGenParticle>::const_iterator i_particle, endparticle = particles->end();
     for (i_particle = particles->begin(); i_particle != endparticle; ++i_particle) {
       int etaIndex = getEtaIndex( i_particle->eta() );
-      if(writeCands_) {
+      //if(writeCands_) {
         particle_type.push_back( i_particle->pdgId() );
         particle_et.push_back( i_particle->et() );
         particle_pt.push_back( i_particle->pt() );
         particle_eta.push_back( i_particle->eta() );
         particle_phi.push_back( i_particle->phi() );
-      }
+      //}
       et_gen[etaIndex] += i_particle->et();
       h2_GME_gen->Fill(i_particle->eta(),i_particle->phi(),i_particle->et());
       h2_finnereta_gen->Fill(i_particle->eta(),i_particle->phi(),i_particle->et());
