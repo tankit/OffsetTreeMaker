@@ -213,7 +213,7 @@ void  OffsetTreeMaker::beginJob() {
   if (isMC_) {
     tree->Branch("et_gme_gen",   et_gme_gen, "et_gme_gen[18][11]/F");
     tree->Branch("ch_et_gme_gen",   ch_et_gme_gen, "ch_et_gme_gen[18][11]/b");
-    tree->Branch("et_gen",     et_gen,     "et[nEta]/F");
+    tree->Branch("et_gen",     et_gen,     "et_gen[nEta]/F");
     tree->Branch("etMED_gen",  etMED_gen,  "etMED_gen[nEta]/F");
     tree->Branch("etMEAN_gen", etMEAN_gen, "etMEAN_gen[nEta]/F");
     tree->Branch("et_twopi_gen", et_twopi_gen, "et_twopi_gen[18][11]/F");
