@@ -118,7 +118,6 @@ class OffsetTreeMaker : public edm::EDAnalyzer {
     vector<float> pf_pt, pf_eta, pf_phi, pf_et;
     vector<int> particle_id;
     vector<float> particle_et, particle_pt, particle_eta, particle_phi;
-    vector<float> particle_energy, particle_mass;
 
     TString RootFileName_;
     string puFileName_;
@@ -224,8 +223,6 @@ void  OffsetTreeMaker::beginJob() {
     tree->Branch("particle_eta",    "std::vector<float>", &particle_eta);
     tree->Branch("particle_phi",    "std::vector<float>", &particle_phi);
     tree->Branch("particle_et",     "std::vector<float>", &particle_et);
-    tree->Branch("particle_energy", "std::vector<float>", &particle_energy);
-    tree->Branch("particle_mass",   "std::vector<float>", &particle_mass);
     tree->Branch("weight",        &weight,        "weight/F");
     tree->Branch("nGenParticles", &nGenParticles, "nGenParticles/I");
   }
@@ -334,10 +331,9 @@ void OffsetTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     h2_GME_gen->Reset(); h2_finnereta_gen->Reset(); h2_twopi_gen->Reset();
 
     particle_id.clear(); particle_et.clear(); particle_pt.clear(); particle_eta.clear(); particle_phi.clear();
-    particle_energy.clear(); particle_mass.clear();
 
+    int nGenPar = 0;
     vector<reco::GenParticle>::const_iterator i_particle, endparticle = particles->end();
-    //vector<pat::PackedGenParticle>::const_iterator i_particle, endparticle = particles->end();
     for (i_particle = particles->begin(); i_particle != endparticle; ++i_particle) {
       int etaIndex = getEtaIndex( i_particle->eta() );
       //int abspdgId = abs( i_particle->pdgId() );
@@ -348,8 +344,7 @@ void OffsetTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& i
         particle_pt.push_back( i_particle->pt() );
         particle_eta.push_back( i_particle->eta() );
         particle_phi.push_back( i_particle->phi() );
-        particle_energy.push_back( i_particle->energy() );
-        particle_mass.push_back( i_particle->mass() );
+        ++nGenPar;
       }
       et_gen[etaIndex] += i_particle->et();
       h2_GME_gen->Fill(i_particle->eta(),i_particle->phi(),i_particle->et());
@@ -357,6 +352,7 @@ void OffsetTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       float i_phi = (i_particle->phi()>=0) ? i_particle->phi() : i_particle->phi() + 2*M_PI;
       h2_twopi_gen->Fill(i_particle->eta(),i_phi,i_particle->et());
     }
+    nGenParticles = nGenPar; 
 
     for (int ieta = 1; ieta != (ETA_BINS+1); ++ieta){
       vector<double> x_gen; double et_sum_gen = 0;

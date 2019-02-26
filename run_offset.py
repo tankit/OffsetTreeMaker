@@ -25,7 +25,7 @@ isMC = cms.bool(True)
 
 if isMC:
   OutputName = "_MC"
-  print "MC" 
+ 
   process.load( "Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff" )
   from Configuration.AlCa.GlobalTag import GlobalTag
   process.GlobalTag = GlobalTag( process.GlobalTag, '94X_mc2017_realistic_v11' )
@@ -65,7 +65,7 @@ process.pf = cms.EDAnalyzer("OffsetTreeMaker",
     RootFileName = cms.string("Offset" + OutputName + ".root"),
     puFileName = cms.string("lumi-per-bx.root"),
     isMC = isMC,
-    writeCands = cms.bool(True),
+    writeCands = cms.bool(False),
     Generator = cms.InputTag("generator"),
     GenParticles = cms.InputTag("genParticles"),
     trackTag = cms.InputTag("generalTracks"),
@@ -73,8 +73,6 @@ process.pf = cms.EDAnalyzer("OffsetTreeMaker",
     pvTag = cms.InputTag("offlinePrimaryVertices"),
     muTag = cms.InputTag("addPileupInfo"),
     rhoTag = cms.InputTag("fixedGridRhoFastjetAll"),
-    rhoCaloTag = cms.InputTag("fixedGridRhoFastjetAllCalo"),
-    rhoCentralTag = cms.InputTag("fixedGridRhoFastjetCentral"),
     rhoC0Tag = cms.InputTag("fixedGridRhoFastjetCentralNeutral"),
     rhoCCTag = cms.InputTag("fixedGridRhoFastjetCentralChargedPileUp"),
     pfJetTag = cms.InputTag("ak4PFJetsCHS")
