@@ -213,7 +213,7 @@ void  OffsetTreeMaker::beginJob() {
   if (isMC_) {
     tree->Branch("et_gme_gen",   et_gme_gen, "et_gme_gen[18][11]/F");
     tree->Branch("ch_et_gme_gen",   ch_et_gme_gen, "ch_et_gme_gen[18][11]/b");
-    tree->Branch("et_gen",     et_gen,     "et[nEta]/F");
+    tree->Branch("et_gen",     et_gen,     "et_gen[nEta]/F");
     tree->Branch("etMED_gen",  etMED_gen,  "etMED_gen[nEta]/F");
     tree->Branch("etMEAN_gen", etMEAN_gen, "etMEAN_gen[nEta]/F");
     tree->Branch("et_twopi_gen", et_twopi_gen, "et_twopi_gen[18][11]/F");
@@ -326,7 +326,6 @@ void OffsetTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     //vector<reco::GenParticle>::const_iterator i_particle, endparticle = particles->end();
     vector<pat::PackedGenParticle>::const_iterator i_particle, endparticle = particles->end();
     for (i_particle = particles->begin(); i_particle != endparticle; ++i_particle) {
-      //int particleId = fabs(i_particle->pdgId()); //if (particleId>500) continue;
       int etaIndex = getEtaIndex( i_particle->eta() );
       if(writeCands_) {
         particle_type.push_back( i_particle->pdgId() );
@@ -470,15 +469,15 @@ void OffsetTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   for (i_trk = tracks->begin(); i_trk != endtrk; ++i_trk) {
 
     if ( !i_trk->quality(reco::Track::tight) ) continue;
-//    bool matched = false;
-//
-//    vector<pat::PackedCandidate>::const_iterator i_pf, endpf = pfCandidates->end();
-//    for (i_pf = pfCandidates->begin();  i_pf != endpf && !matched; ++i_pf) {
-//
-//      if ( &(*i_trk) == i_pf->trackRef().get() )
-//        matched = true;      
-//    }
-//    if (matched) continue;
+    bool matched = false;
+
+    vector<pat::PackedCandidate>::const_iterator i_pf, endpf = pfCandidates->end();
+    for (i_pf = pfCandidates->begin();  i_pf != endpf && !matched; ++i_pf) {
+
+      if ( &(*i_trk) == i_pf->trackRef().get() )
+        matched = true;      
+    }
+    if (matched) continue;
 
     int etaIndex = getEtaIndex( i_trk->eta() );
     if (etaIndex == -1) continue;
