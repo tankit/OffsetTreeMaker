@@ -17,7 +17,7 @@ process.options.allowUnscheduled = cms.untracked.bool(True)
 readFiles = cms.untracked.vstring()
 process.source = cms.Source ("PoolSource", fileNames = readFiles)
 readFiles.extend( [
-  #'/store/data/Run2017B/ZeroBias/MINIAOD/17Nov2017-v1/50000/FAA4C8D3-D4D3-E711-A750-484D7E8DF114.root' 
+  #'/store/data/Run2018A/ZeroBias/MINIAOD/17Sep2018-v1/270000/CF17FA6E-2087-7E46-8532-649DD412855C.root'
   '/store/mc/RunIIFall17MiniAODv2/QCD_Pt-15to7000_TuneCUETHS1_Flat_13TeV_herwigpp/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/70000/FE935FB1-DD44-E811-B398-0CC47AA53D66.root'
 ] );
 
@@ -37,7 +37,9 @@ else:
   process.load( "Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff" )
   process.load( "Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff" )
   from Configuration.AlCa.GlobalTag import GlobalTag
-  process.GlobalTag = GlobalTag( process.GlobalTag, '94X_dataRun2_ReReco17_forValidation' )
+  #process.GlobalTag = GlobalTag( process.GlobalTag, '94X_dataRun2_ReReco17_forValidation' )
+  #process.GlobalTag = GlobalTag( process.GlobalTag, '94X_dataRun2_ReReco_EOY17_v6' )
+  process.GlobalTag = GlobalTag( process.GlobalTag, '102X_dataRun2_Sep2018Rereco_v1' )
 
   # ZeroBias Trigger
   process.HLTZeroBias =cms.EDFilter("HLTHighLevel",
@@ -64,7 +66,8 @@ process.pf = cms.EDAnalyzer("OffsetTreeMaker",
     RootFileName = cms.string("Offset" + OutputName + ".root"),
     puFileName = cms.string("lumi-per-bx.root"),
     isMC = isMC,
-    writeCands = cms.bool(True),
+    writeCands = cms.bool(False),
+    writeParticles = cms.bool(True),
     #trackTag = cms.InputTag("generalTracks"),
     Generator = cms.InputTag("generator"),
     #GenParticles = cms.InputTag("prunedGenParticles"),
