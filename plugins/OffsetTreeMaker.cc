@@ -463,23 +463,24 @@ void OffsetTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     }
   }
 
-  vector<double> xg; vector<double> xg_gen;
+  vector<double> xg(ETA_BINS_GME*PHI_BINS_GME); vector<double> xg_gen(ETA_BINS_GME*PHI_BINS_GME);
   for (int ieta = 1; ieta != (ETA_BINS_GME+1); ++ieta){
-    for (int iphi = 1; iphi != PHI_BINS_GME+1; ++iphi){
+    for (int iphi = 1; iphi != (PHI_BINS_GME+1); ++iphi){
+      int igrid = PHI_BINS_GME*(ieta-1)+(iphi-1);
       et_gme[ieta-1][iphi-1] =  h2_GME->GetBinContent(ieta, iphi);
       ch_et_gme[ieta-1][iphi-1] =  char(min(255, int( h2_GME->GetBinContent(ieta, iphi)/0.1)));
       et_twopi[ieta-1][iphi-1] =  h2_twopi->GetBinContent(ieta, iphi);
-      xg.push_back(et_twopi[ieta-1][iphi-1]/GRID_AREA);
+      xg[igrid] = et_twopi[ieta-1][iphi-1]/GRID_AREA;
       if (isMC_) {
         et_gme_gen[ieta-1][iphi-1] =  h2_GME_gen->GetBinContent(ieta, iphi);
         ch_et_gme_gen[ieta-1][iphi-1] =  char(min(255, int( h2_GME_gen->GetBinContent(ieta, iphi)/0.1)));
         et_twopi_gen[ieta-1][iphi-1] =  h2_twopi_gen->GetBinContent(ieta, iphi);
-        xg_gen.push_back(et_twopi_gen[ieta-1][iphi-1]/GRID_AREA);
+        xg_gen[igrid] = et_twopi_gen[ieta-1][iphi-1]/GRID_AREA;
       }
     }
   }
   sort(xg.begin(),xg.end()); rho_gme = 0.5*(xg[98]+xg[99]); // out of 11*18=198 entries
-  sort(xg_gen.begin(),xg_gen.end()); rho_gme_gen = 0.5*(xg_gen[98]+xg_gen[99]);
+  if (isMC_) { sort(xg_gen.begin(),xg_gen.end()); rho_gme_gen = 0.5*(xg_gen[98]+xg_gen[99]); }
 
   for (int ieta = 1; ieta != (ETA_BINS+1); ++ieta){
     vector<double> x;
