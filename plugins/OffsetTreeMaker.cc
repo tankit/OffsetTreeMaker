@@ -31,6 +31,7 @@
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 #include "DataFormats/Common/interface/Ref.h"
 #include <SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h>
@@ -56,6 +57,9 @@ const double GRID_AREA = (10./ETA_BINS_GME)*(2*M_PI/PHI_BINS_GME);
 const int MAXNPV = 150;
 const int MAXJETS = 4;
 
+
+float muWeight_Run2017D[80] = { 0.000000,0.000000,0.000002,0.000019,0.000066,0.000127,0.000154,0.000164,0.000159,0.000164,0.000201,0.000251,0.000383,0.000707,0.001715,0.005040,0.012966,0.023951,0.033498,0.040964,0.046665,0.049625,0.051241,0.054287,0.059305,0.064711,0.068642,0.070111,0.068788,0.064589,0.057980,0.049998,0.041697,0.033764,0.026589,0.020402,0.015300,0.011246,0.008106,0.005715,0.003926,0.002617,0.001687,0.001050,0.000631,0.000366,0.000206,0.000112,0.000058,0.000030,0.000014,0.000007,0.000003,0.000001,0.000001,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000 };
+float muWeight_Run2017E[80] = { 0.000000,0.000001,0.000010,0.000019,0.000041,0.000084,0.000103,0.000134,0.000142,0.000149,0.000179,0.000347,0.000791,0.001573,0.002727,0.004371,0.006719,0.009951,0.014011,0.018429,0.022376,0.025295,0.027196,0.028305,0.028876,0.029197,0.029491,0.029891,0.030495,0.031348,0.032376,0.033378,0.034091,0.034331,0.034082,0.033479,0.032694,0.031851,0.031002,0.030153,0.029294,0.028422,0.027538,0.026641,0.025709,0.024696,0.023538,0.022170,0.020548,0.018665,0.016562,0.014324,0.012059,0.009878,0.007876,0.006118,0.004637,0.003436,0.002494,0.001777,0.001247,0.000863,0.000591,0.000401,0.000271,0.000182,0.000123,0.000082,0.000055,0.000037,0.000025,0.000017,0.000012,0.000008,0.000005,0.000004,0.000002,0.000002,0.000001,0.000001 };
 
 float etabins[ETA_BINS+1] =
   {-5.191, -4.889, -4.716, -4.538, -4.363, -4.191, -4.013, -3.839, -3.664, -3.489, -3.314, -3.139, -2.964, -2.853, -2.65,
@@ -88,27 +92,27 @@ class OffsetTreeMaker : public edm::EDAnalyzer {
     TH1F* h;
     TH2F* h2_GME; // 2d ET_eta_phi histo 
     TH2F* h2_finnereta;
-    TH2F *h2_GME_gen, *h2_finnereta_gen; // for GenParticle
-    TH2F *h2_twopi, *h2_twopi_gen; // for phi from 0 to 2*Pi
+//    TH2F *h2_GME_gen, *h2_finnereta_gen; // for GenParticle
+    TH2F *h2_twopi, *h2_twopi_gen, *h2_twopi_det, *h2_twopi_scaled; // for phi from 0 to 2*Pi
     TRandom3* rand;
 
     int nEta;
     float energy[ETA_BINS], eRMS[ETA_BINS], et[ETA_BINS], etMED[ETA_BINS], etMEAN[ETA_BINS];
     float et_gme[ETA_BINS_GME][PHI_BINS_GME];
-    float et_gme_gen[ETA_BINS_GME][PHI_BINS_GME];
-    UChar_t ch_et_gme[ETA_BINS_GME][PHI_BINS_GME];
-    UChar_t ch_et_gme_gen[ETA_BINS_GME][PHI_BINS_GME];
+//    float et_gme_gen[ETA_BINS_GME][PHI_BINS_GME];
     UChar_t f[numFlavors][ETA_BINS];  //energy fraction by flavor
-    float et_gen[ETA_BINS], etMED_gen[ETA_BINS], etMEAN_gen[ETA_BINS];
-    float et_twopi[ETA_BINS_GME][PHI_BINS_GME], et_twopi_gen[ETA_BINS_GME][PHI_BINS_GME];
-    float rho_gme, rho_gme_gen;
+//    float et_gen[ETA_BINS], etMED_gen[ETA_BINS], etMEAN_gen[ETA_BINS];
+    float et_twopi[ETA_BINS_GME][PHI_BINS_GME], et_twopi_gen[ETA_BINS_GME][PHI_BINS_GME], et_twopi_det[ETA_BINS_GME][PHI_BINS_GME], et_twopi_scaled[ETA_BINS_GME][PHI_BINS_GME];
+    float rho_gme, rho_gme_gen, rho_gme_det, rho_gme_scaled;
 
     ULong64_t event;
     int run, lumi, bx;
-    float mu;
+    float mu, muWeight;
     float rho, rhoC0, rhoCC;
+    float rhoCentral, rhoCentralCalo;
     float weight;
     int nGenParticles;
+    int idHardScat1, idHardScat2, idxHardScat;
 
     int nPVall, nPV;
     float pv_ndof[MAXNPV], pv_z[MAXNPV], pv_rho[MAXNPV];
@@ -120,8 +124,10 @@ class OffsetTreeMaker : public edm::EDAnalyzer {
 
     vector<int> pf_type;
     vector<float> pf_pt, pf_eta, pf_phi, pf_et;
-    vector<int> particle_id;
+    vector<int> particle_id, particle_charge;
     vector<float> particle_et, particle_pt, particle_eta, particle_phi;
+    vector<float> particle_et_scaled;
+    vector<bool> isPromptFinalState;
 
     TString RootFileName_;
     string puFileName_;
@@ -133,11 +139,13 @@ class OffsetTreeMaker : public edm::EDAnalyzer {
     edm::EDGetTokenT< vector<PileupSummaryInfo> > muTag_;
     edm::EDGetTokenT< vector<pat::PackedCandidate> > pfTag_;
     edm::EDGetTokenT< vector<pat::PackedGenParticle> > genTag_;
-    //edm::EDGetTokenT< vector<reco::GenParticle> > genparticlesTag_;
+    edm::EDGetTokenT< vector<reco::GenParticle> > genparticlesTag_;
     edm::EDGetTokenT< GenEventInfoProduct > generatorTag_;
     edm::EDGetTokenT<double> rhoTag_;
     edm::EDGetTokenT<double> rhoC0Tag_;
     edm::EDGetTokenT<double> rhoCCTag_;
+    edm::EDGetTokenT<double> rhoCentralTag_;
+    edm::EDGetTokenT<double> rhoCentralCaloTag_;
     edm::EDGetTokenT< vector<pat::Jet> > pfJetTag_;
 };
 
@@ -154,11 +162,13 @@ OffsetTreeMaker::OffsetTreeMaker(const edm::ParameterSet& iConfig)
   muTag_ = consumes< vector<PileupSummaryInfo> >( iConfig.getParameter<edm::InputTag>("muTag") );
   pfTag_ = consumes< vector<pat::PackedCandidate> >( iConfig.getParameter<edm::InputTag>("pfTag") );
   genTag_ = consumes< vector<pat::PackedGenParticle> >( iConfig.getParameter<edm::InputTag>("genTag") );
-  //genparticlesTag_ = consumes< vector<reco::GenParticle> >( iConfig.getParameter<edm::InputTag>("GenParticles") );
+  genparticlesTag_ = consumes< vector<reco::GenParticle> >( iConfig.getParameter<edm::InputTag>("GenParticles") );
   generatorTag_ = consumes<GenEventInfoProduct>( iConfig.getParameter<edm::InputTag>("Generator") );
   rhoTag_ = consumes<double>( iConfig.getParameter<edm::InputTag>("rhoTag") );
   rhoC0Tag_ = consumes<double>( iConfig.getParameter<edm::InputTag>("rhoC0Tag") );
   rhoCCTag_ = consumes<double>( iConfig.getParameter<edm::InputTag>("rhoCCTag") );
+  rhoCentralTag_ = consumes<double>( iConfig.getParameter<edm::InputTag>("rhoCentralTag") );
+  rhoCentralCaloTag_ = consumes<double>( iConfig.getParameter<edm::InputTag>("rhoCentralCaloTag") );
   pfJetTag_ = consumes< vector<pat::Jet> >( iConfig.getParameter<edm::InputTag>("pfJetTag") );
 }
 
@@ -173,10 +183,12 @@ void  OffsetTreeMaker::beginJob() {
   rand = new TRandom3;
   h2_GME = new TH2F("GME_2D", "GME_2D_yPhi_xEta", ETA_BINS_GME, -5.0, 5.0, PHI_BINS_GME , -1*M_PI , M_PI);
   h2_finnereta = new TH2F("finnereta_ET", "yPhi_xEta", ETA_BINS, etabins, PHI_BINS_GME, phibins);
-  h2_GME_gen = new TH2F("GME_2D_gen", "GME_2D_yPhi_xEta", ETA_BINS_GME, -5.0, 5.0, PHI_BINS_GME , -1*M_PI , M_PI);
-  h2_finnereta_gen = new TH2F("finnereta_ET_gen", "yPhi_xEta", ETA_BINS, etabins, PHI_BINS_GME, phibins);
+//  h2_GME_gen = new TH2F("GME_2D_gen", "GME_2D_yPhi_xEta", ETA_BINS_GME, -5.0, 5.0, PHI_BINS_GME , -1*M_PI , M_PI);
+//  h2_finnereta_gen = new TH2F("finnereta_ET_gen", "yPhi_xEta", ETA_BINS, etabins, PHI_BINS_GME, phibins);
   h2_twopi = new TH2F("GME_twopi", "GME_2D_yPhi_xEta", ETA_BINS_GME, -5.0, 5.0, PHI_BINS_GME , 0 , 2*M_PI);
   h2_twopi_gen = new TH2F("GME_twopi_gen", "GME_2D_yPhi_xEta", ETA_BINS_GME, -5.0, 5.0, PHI_BINS_GME , 0 , 2*M_PI);
+  h2_twopi_det = new TH2F("GME_twopi_det", "GME_2D_yPhi_xEta", ETA_BINS_GME, -5.0, 5.0, PHI_BINS_GME , 0 , 2*M_PI);
+  h2_twopi_scaled = new TH2F("GME_twopi_scaled", "GME_2D_yPhi_xEta", ETA_BINS_GME, -5.0, 5.0, PHI_BINS_GME , 0 , 2*M_PI);
 
   if (!isMC_){
     parsePileUpJSON2( puFileName_ );
@@ -196,10 +208,13 @@ void  OffsetTreeMaker::beginJob() {
   }
 
   tree->Branch("mu", &mu, "mu/F");
+  tree->Branch("muWeight", &muWeight, "muWeight/F");
 
   tree->Branch("rho",   &rho,   "rho/F");
   tree->Branch("rhoC0", &rhoC0, "rhoC0/F");
   tree->Branch("rhoCC", &rhoCC, "rhoCC/F");
+  tree->Branch("rhoCentral", &rhoCentral, "rhoCentral/F");
+  tree->Branch("rhoCentralCalo", &rhoCentralCalo, "rhoCentralCalo/F");
 
   tree->Branch("nPVall",  &nPVall, "nPVall/I");
   tree->Branch("nPV",     &nPV,    "nPV/I");
@@ -216,25 +231,33 @@ void  OffsetTreeMaker::beginJob() {
   tree->Branch("etMEAN",    etMEAN,    "etMEAN[nEta]/F");
 
   tree->Branch("et_gme",       et_gme,     "et_gme[18][11]/F");
-  tree->Branch("ch_et_gme",       ch_et_gme,     "ch_et_gme[18][11]/b");
   tree->Branch("et_twopi",     et_twopi,     "et_twopi[18][11]/F");
   tree->Branch("rho_gme",   &rho_gme,  "rho_gme/F");
   if (isMC_) {
-    tree->Branch("et_gme_gen",   et_gme_gen, "et_gme_gen[18][11]/F");
-    tree->Branch("ch_et_gme_gen",   ch_et_gme_gen, "ch_et_gme_gen[18][11]/b");
+//    tree->Branch("et_gme_gen",   et_gme_gen, "et_gme_gen[18][11]/F");
     tree->Branch("et_twopi_gen", et_twopi_gen, "et_twopi_gen[18][11]/F");
     tree->Branch("rho_gme_gen", &rho_gme_gen, "rho_gme_gen/F");
-    tree->Branch("et_gen",     et_gen,     "et_gen[nEta]/F");
-    tree->Branch("etMED_gen",  etMED_gen,  "etMED_gen[nEta]/F");
-    tree->Branch("etMEAN_gen", etMEAN_gen, "etMEAN_gen[nEta]/F");
+    tree->Branch("et_twopi_det", et_twopi_det, "et_twopi_det[18][11]/F");
+    tree->Branch("rho_gme_det", &rho_gme_det, "rho_gme_det/F");
+    tree->Branch("et_twopi_scaled", et_twopi_scaled, "et_twopi_scaled[18][11]/F");
+    tree->Branch("rho_gme_scaled", &rho_gme_scaled, "rho_gme_scaled/F");
+//    tree->Branch("et_gen",     et_gen,     "et_gen[nEta]/F");
+//    tree->Branch("etMED_gen",  etMED_gen,  "etMED_gen[nEta]/F");
+//    tree->Branch("etMEAN_gen", etMEAN_gen, "etMEAN_gen[nEta]/F");
     tree->Branch("weight",        &weight,        "weight/F");
     tree->Branch("nGenParticles", &nGenParticles, "nGenParticles/I");
+    tree->Branch("idHardScat1", &idHardScat1, "idHardScat1/I");
+    tree->Branch("idHardScat2", &idHardScat2, "idHardScat2/I");
+    tree->Branch("idxHardScat", &idxHardScat, "idxHardScat/I");
     if (writeParticles_) {
       tree->Branch("particle_id",   "std::vector<int>",   &particle_id);
       tree->Branch("particle_pt",   "std::vector<float>", &particle_pt);
       tree->Branch("particle_eta",  "std::vector<float>", &particle_eta);
       tree->Branch("particle_phi",  "std::vector<float>", &particle_phi);
       tree->Branch("particle_et",   "std::vector<float>", &particle_et);
+      tree->Branch("particle_charge", "std::vector<int>", &particle_charge);
+      tree->Branch("isPromptFinalState", "std::vector<bool>", &isPromptFinalState);
+      tree->Branch("particle_et_scaled",   "std::vector<float>", &particle_et_scaled);
     }
   }
 
@@ -284,6 +307,10 @@ void OffsetTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     event = iEvent.id().event();
 
     mu = getAvgPU( run, lumi );
+    int muI = mu;
+    if (run>=302031 && run<=302663) muWeight = muWeight_Run2017D[muI];
+    else if (run>=303824 && run<=304797) muWeight = muWeight_Run2017E[muI];
+    else muWeight = 1;
     if (mu==0) return;
   }
 
@@ -321,6 +348,14 @@ void OffsetTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   iEvent.getByToken(rhoCCTag_, rhoCCHandle);
   rhoCC = *rhoCCHandle;
 
+  edm::Handle<double> rhoCentralHandle;
+  iEvent.getByToken(rhoCentralTag_, rhoCentralHandle);
+  rhoCentral = *rhoCentralHandle;
+
+  edm::Handle<double> rhoCentralCaloHandle;
+  iEvent.getByToken(rhoCentralCaloTag_, rhoCentralCaloHandle);
+  rhoCentralCalo = *rhoCentralCaloHandle;
+
 //------------ Gen Particles -----------//
 
   if (isMC_) {
@@ -330,8 +365,9 @@ void OffsetTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     weight = genInfo->weight();
     //if( genInfo->weight() > 0 ) weight = 1.0; else weight = -1.0;
 
-    //edm::Handle<std::vector<reco::GenParticle>> particles;
-    //iEvent.getByToken(genparticlesTag_, particles);
+    edm::Handle<std::vector<reco::GenParticle>> pruned;
+    iEvent.getByToken(genparticlesTag_, pruned);
+    //const std::vector<reco::GenParticle>>* genps_coll = pruned.product();
 
     edm::Handle<std::vector<pat::PackedGenParticle>> particles;
     iEvent.getByToken(genTag_, particles);
@@ -339,51 +375,90 @@ void OffsetTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     nGenParticles = particles->size();
     if( particles->size() == 0 ) return;
 
-    memset(et_gen, 0, sizeof(et_gen));
-    memset(etMED_gen, 0, sizeof(etMED_gen));
-    memset(etMEAN_gen, 0, sizeof(etMEAN_gen));
-    memset(et_gme_gen,    0, sizeof(et_gme_gen));
-    memset(ch_et_gme_gen, 0, sizeof(ch_et_gme_gen));
+//    memset(et_gen, 0, sizeof(et_gen));
+//    memset(etMED_gen, 0, sizeof(etMED_gen));
+//    memset(etMEAN_gen, 0, sizeof(etMEAN_gen));
     memset(et_twopi_gen,  0, sizeof(et_twopi_gen));
+    memset(et_twopi_det,  0, sizeof(et_twopi_det));
+    memset(et_twopi_scaled,  0, sizeof(et_twopi_scaled));
 
-    h2_GME_gen->Reset(); h2_finnereta_gen->Reset(); h2_twopi_gen->Reset();
+    //h2_GME_gen->Reset(); h2_finnereta_gen->Reset();
+    h2_twopi_gen->Reset(); h2_twopi_det->Reset(); h2_twopi_scaled->Reset();
 
-    particle_id.clear(); particle_et.clear(); particle_pt.clear(); particle_eta.clear(); particle_phi.clear();
+    particle_id.clear(); particle_et.clear(); particle_pt.clear(); particle_eta.clear(); particle_phi.clear(); particle_charge.clear();
+    isPromptFinalState.clear(); particle_et_scaled.clear();
 
-    int nGenPar = 0;
+    int id_hard1 = 0, id_hard2 = 0, n_hard = 0;
+    for (size_t i = 0; i < pruned->size(); ++i ) {
+      const reco::GenParticle & p = (*pruned)[i];
+      if (p.status() == 21) { //incoming particles of the hardest subprocess
+        if (n_hard==0) id_hard1 = p.pdgId();
+        else if (n_hard==1) id_hard2 = p.pdgId();
+        n_hard++;
+      }
+    }
+    int idx_hard = -1;
+    if (id_hard1 == 21 && id_hard2 == 21) idx_hard = 2; //gg
+    else if (id_hard1 == 21 || id_hard2 == 21) idx_hard = 1; //gq
+    else if (id_hard1 != 0 && id_hard2 != 0 && fabs(id_hard1) < 6 && fabs(id_hard2) < 6) idx_hard = 0; //qq
+
+    int nGenPar = 0; //float etEM = 0, etCH = 0, etNH = 0;
     //vector<reco::GenParticle>::const_iterator i_particle, endparticle = particles->end();
     vector<pat::PackedGenParticle>::const_iterator i_particle, endparticle = particles->end();
     for (i_particle = particles->begin(); i_particle != endparticle; ++i_particle) {
-      int etaIndex = getEtaIndex( i_particle->eta() );
+//      int etaIndex = getEtaIndex( i_particle->eta() );
+      int pdgIdAbs = abs(i_particle->pdgId());
+      float newPhi = (i_particle->phi()>=0) ? i_particle->phi() : i_particle->phi() + 2*M_PI;
+      if (pdgIdAbs != 12 && pdgIdAbs != 14 && pdgIdAbs != 16) {
+//        et_gen[etaIndex] += i_particle->et();
+//        h2_GME_gen->Fill(i_particle->eta(),i_particle->phi(),i_particle->et());
+//        h2_finnereta_gen->Fill(i_particle->eta(),i_particle->phi(),i_particle->et());
+        h2_twopi_gen->Fill(i_particle->eta(),newPhi,i_particle->et());
+      }
+      int charge = i_particle->charge();
+      float et = i_particle->et(); //updated on Nov 18, 2019
+      //if (pdgIdAbs == 11 || pdgIdAbs == 22) etEM += et; //electron and photon
+      //if (pdgIdAbs == 211 || pdgIdAbs == 321) etCH += et; //pion and kaon
+      //if (pdgIdAbs == 111 || pdgIdAbs == 311) etNH += et; //pi0 and K0
+      float et_scaled = et; //added on Dec 9th, 2019
+      if (charge == 0 && pdgIdAbs != 22 && pdgIdAbs != 12 && pdgIdAbs != 14 && pdgIdAbs != 16) {
+        float et_nhHHe = 0.45*et, et_nhHCAL = 0.55*0.5*et, et_nhECAL = 0.55*0.5*et;
+        float et_nhECAL_scaled = et_nhECAL * 1.076 * (1-1.403*pow(et_nhECAL,0.646-1));
+        et_scaled = et_nhHHe + et_nhHCAL + et_nhECAL_scaled;
+      }
+
+      if (pdgIdAbs == 11 || pdgIdAbs == 13 || pdgIdAbs == 15 || ((pdgIdAbs < 11 || pdgIdAbs > 16) && ((pdgIdAbs == 22 && et > 0.3) || (charge!=0 && et > 0.4) || (charge==0 && pdgIdAbs != 22 && et_scaled > 3)))) h2_twopi_scaled->Fill(i_particle->eta(),newPhi,et_scaled);
+
+      if ((pdgIdAbs < 11 || pdgIdAbs > 16) && ((pdgIdAbs == 22 && et < 0.3) || (charge!=0 && et < 0.4) || (charge==0 && pdgIdAbs != 22 && et < 3))) continue;
+      ++nGenPar;
+
       if (writeParticles_) {
         particle_id.push_back( i_particle->pdgId() );
         particle_et.push_back( i_particle->et() );
         particle_pt.push_back( i_particle->pt() );
         particle_eta.push_back( i_particle->eta() );
         particle_phi.push_back( i_particle->phi() );
+        particle_charge.push_back( i_particle->charge() );
+        isPromptFinalState.push_back( i_particle->isPromptFinalState() );
+        particle_et_scaled.push_back( et );
       }
-      int pdgIdAbs = abs(i_particle->pdgId());
-      if (pdgIdAbs == 12 || pdgIdAbs == 14 || pdgIdAbs == 16) continue;
-      ++nGenPar;
-      et_gen[etaIndex] += i_particle->et();
-      h2_GME_gen->Fill(i_particle->eta(),i_particle->phi(),i_particle->et());
-      h2_finnereta_gen->Fill(i_particle->eta(),i_particle->phi(),i_particle->et());
-      float newPhi = (i_particle->phi()>=0) ? i_particle->phi() : i_particle->phi() + 2*M_PI;
-      h2_twopi_gen->Fill(i_particle->eta(),newPhi,i_particle->et());
+
+      if (pdgIdAbs != 12 && pdgIdAbs != 14 && pdgIdAbs != 16) h2_twopi_det->Fill(i_particle->eta(),newPhi,et);
     }
     nGenParticles = nGenPar;
+    idHardScat1 = id_hard1; idHardScat2 = id_hard2; idxHardScat = idx_hard;
 
-    for (int ieta = 1; ieta != (ETA_BINS+1); ++ieta){
-      vector<double> x_gen; double et_sum_gen = 0;
-      for (int iphi = 1; iphi != PHI_BINS_GME+1; ++iphi){
-        x_gen.push_back(h2_finnereta_gen->GetBinContent(ieta, iphi));
-        et_sum_gen += h2_finnereta_gen->GetBinContent(ieta, iphi);
-      }
-      sort(x_gen.begin(),x_gen.end());
-      float median_gen = x_gen[5]; // for 11 phi bins
-      etMED_gen[ieta-1] = median_gen;
-      etMEAN_gen[ieta-1] = float(et_sum_gen)/(11);
-    }
+//    for (int ieta = 1; ieta != (ETA_BINS+1); ++ieta){
+//      vector<double> x_gen; double et_sum_gen = 0;
+//      for (int iphi = 1; iphi != PHI_BINS_GME+1; ++iphi){
+//        x_gen.push_back(h2_finnereta_gen->GetBinContent(ieta, iphi));
+//        et_sum_gen += h2_finnereta_gen->GetBinContent(ieta, iphi);
+//      }
+//      sort(x_gen.begin(),x_gen.end());
+//      float median_gen = x_gen[5]; // for 11 phi bins
+//      etMED_gen[ieta-1] = median_gen;
+//      etMEAN_gen[ieta-1] = float(et_sum_gen)/(11);
+//    }
   }
 
 //------------ PF Particles ------------//
@@ -404,7 +479,6 @@ void OffsetTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   int nPart[ETA_BINS] = {}; //number of particles per eta bin
  
   memset(et_gme,        0, sizeof(et_gme));
-  memset(ch_et_gme,     0, sizeof(ch_et_gme));
   memset(et_twopi,      0, sizeof(et_twopi));
 
   pf_type.clear(); pf_pt.clear(); pf_eta.clear(); pf_phi.clear(); pf_et.clear();
@@ -464,23 +538,30 @@ void OffsetTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   }
 
   vector<double> xg(ETA_BINS_GME*PHI_BINS_GME); vector<double> xg_gen(ETA_BINS_GME*PHI_BINS_GME);
+  vector<double> xg_det(ETA_BINS_GME*PHI_BINS_GME); vector<double> xg_scaled(ETA_BINS_GME*PHI_BINS_GME);
   for (int ieta = 1; ieta != (ETA_BINS_GME+1); ++ieta){
     for (int iphi = 1; iphi != (PHI_BINS_GME+1); ++iphi){
       int igrid = PHI_BINS_GME*(ieta-1)+(iphi-1);
       et_gme[ieta-1][iphi-1] =  h2_GME->GetBinContent(ieta, iphi);
-      ch_et_gme[ieta-1][iphi-1] =  char(min(255, int( h2_GME->GetBinContent(ieta, iphi)/0.1)));
       et_twopi[ieta-1][iphi-1] =  h2_twopi->GetBinContent(ieta, iphi);
       xg[igrid] = et_twopi[ieta-1][iphi-1]/GRID_AREA;
       if (isMC_) {
-        et_gme_gen[ieta-1][iphi-1] =  h2_GME_gen->GetBinContent(ieta, iphi);
-        ch_et_gme_gen[ieta-1][iphi-1] =  char(min(255, int( h2_GME_gen->GetBinContent(ieta, iphi)/0.1)));
+//        et_gme_gen[ieta-1][iphi-1] =  h2_GME_gen->GetBinContent(ieta, iphi);
         et_twopi_gen[ieta-1][iphi-1] =  h2_twopi_gen->GetBinContent(ieta, iphi);
         xg_gen[igrid] = et_twopi_gen[ieta-1][iphi-1]/GRID_AREA;
+        et_twopi_det[ieta-1][iphi-1] =  h2_twopi_det->GetBinContent(ieta, iphi);
+        xg_det[igrid] = et_twopi_det[ieta-1][iphi-1]/GRID_AREA;
+        et_twopi_scaled[ieta-1][iphi-1] =  h2_twopi_scaled->GetBinContent(ieta, iphi);
+        xg_scaled[igrid] = et_twopi_scaled[ieta-1][iphi-1]/GRID_AREA;
       }
     }
   }
   sort(xg.begin(),xg.end()); rho_gme = 0.5*(xg[98]+xg[99]); // out of 11*18=198 entries
-  if (isMC_) { sort(xg_gen.begin(),xg_gen.end()); rho_gme_gen = 0.5*(xg_gen[98]+xg_gen[99]); }
+  if (isMC_) {
+    sort(xg_gen.begin(),xg_gen.end()); rho_gme_gen = 0.5*(xg_gen[98]+xg_gen[99]);
+    sort(xg_det.begin(),xg_det.end()); rho_gme_det = 0.5*(xg_det[98]+xg_det[99]);
+    sort(xg_scaled.begin(),xg_scaled.end()); rho_gme_scaled = 0.5*(xg_scaled[98]+xg_scaled[99]);
+  }
 
   for (int ieta = 1; ieta != (ETA_BINS+1); ++ieta){
     vector<double> x;

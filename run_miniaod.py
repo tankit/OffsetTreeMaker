@@ -18,7 +18,8 @@ readFiles = cms.untracked.vstring()
 process.source = cms.Source ("PoolSource", fileNames = readFiles)
 readFiles.extend( [
   #'/store/data/Run2018A/ZeroBias/MINIAOD/17Sep2018-v1/270000/CF17FA6E-2087-7E46-8532-649DD412855C.root'
-  '/store/mc/RunIIFall17MiniAODv2/QCD_Pt-15to7000_TuneCUETHS1_Flat_13TeV_herwigpp/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/70000/FE935FB1-DD44-E811-B398-0CC47AA53D66.root'
+  #'/store/mc/RunIIFall17MiniAODv2/QCD_Pt-15to7000_TuneCUETHS1_Flat_13TeV_herwigpp/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/70000/FE935FB1-DD44-E811-B398-0CC47AA53D66.root'
+  '/store/mc/RunIISummer19UL17MiniAOD/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/280000/54C32B50-BAA7-0F4A-AE88-8742F92B46A8.root'
 ] );
 
 #isMC = cms.bool(False)
@@ -28,7 +29,9 @@ if isMC:
   OutputName = "_MC"
   process.load( "Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff" )
   from Configuration.AlCa.GlobalTag import GlobalTag
-  process.GlobalTag = GlobalTag( process.GlobalTag, '94X_mc2017_realistic_v14' )
+  #process.GlobalTag = GlobalTag( process.GlobalTag, '94X_mc2017_realistic_v14' )
+  #process.GlobalTag = GlobalTag( process.GlobalTag, '102X_upgrade2018_realistic_v15' )
+  process.GlobalTag = GlobalTag( process.GlobalTag, '106X_mc2017_realistic_v6' )
 
 else:
   OutputName = "_Data"
@@ -39,7 +42,8 @@ else:
   from Configuration.AlCa.GlobalTag import GlobalTag
   #process.GlobalTag = GlobalTag( process.GlobalTag, '94X_dataRun2_ReReco17_forValidation' )
   #process.GlobalTag = GlobalTag( process.GlobalTag, '94X_dataRun2_ReReco_EOY17_v6' )
-  process.GlobalTag = GlobalTag( process.GlobalTag, '102X_dataRun2_Sep2018Rereco_v1' )
+  #process.GlobalTag = GlobalTag( process.GlobalTag, '102X_dataRun2_Sep2018Rereco_v1' )
+  process.GlobalTag = GlobalTag( process.GlobalTag, '106X_dataRun2_v20' )
 
   # ZeroBias Trigger
   process.HLTZeroBias =cms.EDFilter("HLTHighLevel",
@@ -64,13 +68,14 @@ else:
 process.pf = cms.EDAnalyzer("OffsetTreeMaker",
     numSkip = cms.int32(101),
     RootFileName = cms.string("Offset" + OutputName + ".root"),
-    puFileName = cms.string("lumi-per-bx.root"),
+    #puFileName = cms.string("lumi-per-bx.root"),
+    puFileName = cms.string("pileup_2017.txt"),
     isMC = isMC,
     writeCands = cms.bool(False),
-    writeParticles = cms.bool(True),
+    writeParticles = cms.bool(False),
     #trackTag = cms.InputTag("generalTracks"),
     Generator = cms.InputTag("generator"),
-    #GenParticles = cms.InputTag("prunedGenParticles"),
+    GenParticles = cms.InputTag("prunedGenParticles"),
     genTag = cms.InputTag("packedGenParticles"),
     pfTag = cms.InputTag("packedPFCandidates"),
     pvTag = cms.InputTag("offlineSlimmedPrimaryVertices"),
@@ -78,6 +83,8 @@ process.pf = cms.EDAnalyzer("OffsetTreeMaker",
     rhoTag = cms.InputTag("fixedGridRhoFastjetAll"),
     rhoC0Tag = cms.InputTag("fixedGridRhoFastjetCentralNeutral"),
     rhoCCTag = cms.InputTag("fixedGridRhoFastjetCentralChargedPileUp"),
+    rhoCentralTag = cms.InputTag("fixedGridRhoFastjetCentral"),
+    rhoCentralCaloTag = cms.InputTag("fixedGridRhoFastjetCentralCalo"),
     pfJetTag = cms.InputTag("slimmedJets")
 )
 
