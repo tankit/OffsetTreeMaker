@@ -5,7 +5,7 @@ config = config()
 config.General.workArea = 'crab/ZeroBias'
 
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'run_miniaod_UL17.py'
+config.JobType.psetName = 'run_miniaod_ul17.py'
 config.JobType.allowUndistributedCMSSW = True
 config.JobType.inputFiles = ["pileup_2016.txt", "pileup_2017.txt", "pileup_2018.txt"]
 config.JobType.outputFiles = ["Offset_Data.root"]
