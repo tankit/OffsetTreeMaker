@@ -48,11 +48,11 @@ if __name__ == '__main__':
     config.Data.inputDataset = '/ZeroBias/Run2016E-21Feb2020_UL2016_HIPM-v1/MINIAOD'
     crabCommand('submit', config = config)
 
-    config.General.requestName = 'Run2016F_early_v1'
+    config.General.requestName = 'Run2016Fe_v1'
     config.Data.inputDataset = '/ZeroBias/Run2016F-21Feb2020_UL2016_HIPM-v1/MINIAOD'
     crabCommand('submit', config = config)
 
-    config.General.requestName = 'Run2016F_late_v1'
+    config.General.requestName = 'Run2016Fl_v1'
     config.Data.inputDataset = '/ZeroBias/Run2016F-21Feb2020_UL2016-v1/MINIAOD'
     crabCommand('submit', config = config)
 
