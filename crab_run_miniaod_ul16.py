@@ -27,7 +27,11 @@ if __name__ == '__main__':
     
     from CRABAPI.RawCommand import crabCommand
 
-    config.General.requestName = 'Run2016B_v1'
+    config.General.requestName = 'Run2016B_ver1_v1'
+    config.Data.inputDataset = '/ZeroBias/Run2016B-21Feb2020_ver1_UL2016_HIPM-v1/MINIAOD'
+    crabCommand('submit', config = config)
+
+    config.General.requestName = 'Run2016B_ver2_v1'
     config.Data.inputDataset = '/ZeroBias/Run2016B-21Feb2020_ver2_UL2016_HIPM-v1/MINIAOD'
     crabCommand('submit', config = config)
 
@@ -43,11 +47,11 @@ if __name__ == '__main__':
     config.Data.inputDataset = '/ZeroBias/Run2016E-21Feb2020_UL2016_HIPM-v1/MINIAOD'
     crabCommand('submit', config = config)
 
-    config.General.requestName = 'Run2016Fe_v1'
+    config.General.requestName = 'Run2016F_early_v1'
     config.Data.inputDataset = '/ZeroBias/Run2016F-21Feb2020_UL2016_HIPM-v1/MINIAOD'
     crabCommand('submit', config = config)
 
-    config.General.requestName = 'Run2016Fl_v1'
+    config.General.requestName = 'Run2016F_late_v1'
     config.Data.inputDataset = '/ZeroBias/Run2016F-21Feb2020_UL2016-v1/MINIAOD'
     crabCommand('submit', config = config)
 
