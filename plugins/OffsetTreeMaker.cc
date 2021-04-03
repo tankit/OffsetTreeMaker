@@ -427,9 +427,9 @@ void OffsetTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& i
         et_scaled = et_nhHHe + et_nhHCAL + et_nhECAL_scaled;
       }
 
-      if (pdgIdAbs == 11 || pdgIdAbs == 13 || pdgIdAbs == 15 || ((pdgIdAbs < 11 || pdgIdAbs > 16) && ((pdgIdAbs == 22 && et > 0.3) || (charge!=0 && et > 0.4) || (charge==0 && pdgIdAbs != 22 && et_scaled > 3)))) h2_twopi_scaled->Fill(i_particle->eta(),newPhi,et_scaled);
+      if (((pdgIdAbs == 11 || pdgIdAbs == 13 || pdgIdAbs == 15 || pdgIdAbs == 22) && et > 0.3) || ((pdgIdAbs < 11 || pdgIdAbs > 16) && ((charge!=0 && et > 0.4) || (charge==0 && pdgIdAbs != 22 && et_scaled > 3)))) h2_twopi_scaled->Fill(i_particle->eta(),newPhi,et_scaled);
 
-      if ((pdgIdAbs < 11 || pdgIdAbs > 16) && ((pdgIdAbs == 22 && et < 0.3) || (charge!=0 && et < 0.4) || (charge==0 && pdgIdAbs != 22 && et < 3))) continue;
+      if (((pdgIdAbs == 11 || pdgIdAbs == 13 || pdgIdAbs == 15 || pdgIdAbs == 22) && et < 0.3) || ((pdgIdAbs < 11 || pdgIdAbs > 16) && ((charge!=0 && et < 0.4) || (charge==0 && pdgIdAbs != 22 && et < 3)))) continue;
       ++nGenPar;
 
       if (writeParticles_) {
