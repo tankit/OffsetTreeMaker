@@ -27,11 +27,12 @@ if __name__ == '__main__':
     
     from CRABAPI.RawCommand import crabCommand
 
-    config.General.requestName = 'Run2016B_ver1_v1'
-    config.Data.inputDataset = '/ZeroBias/Run2016B-21Feb2020_ver1_UL2016_HIPM-v1/MINIAOD'
-    crabCommand('submit', config = config)
+    ##--no lumi to process (a golden json lumimask does not include those runs)
+    ##config.General.requestName = 'Run2016B_ver1_v1'
+    ##config.Data.inputDataset = '/ZeroBias/Run2016B-21Feb2020_ver1_UL2016_HIPM-v1/MINIAOD'
+    ##crabCommand('submit', config = config)
 
-    config.General.requestName = 'Run2016B_ver2_v1'
+    config.General.requestName = 'Run2016B_v1'
     config.Data.inputDataset = '/ZeroBias/Run2016B-21Feb2020_ver2_UL2016_HIPM-v1/MINIAOD'
     crabCommand('submit', config = config)
 
